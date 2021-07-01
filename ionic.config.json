@@ -1,0 +1,7 @@
+{
+  "name": "TrackingMyPantry",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
