@@ -1,8 +1,11 @@
-import { IonRow, IonItem, IonButton, IonLabel, IonInput, IonCol, IonIcon, IonHeader, IonPage, IonTitle, IonToolbar, IonRouterLink } from '@ionic/react';
+import { IonRow, IonItem, IonRouterOutlet, IonButton, IonLabel, IonInput, IonCol, IonIcon, IonHeader, IonPage, IonTitle, IonToolbar, IonRouterLink } from '@ionic/react';
 import { personCircle } from 'ionicons/icons';
 import { login } from '../request/API';
 import { IonToast } from '@ionic/react';
 import { useState } from 'react';
+import { IonReactRouter } from '@ionic/react-router';
+import { Redirect, Route } from 'react-router-dom';
+import Registration from './Registration';
 
 const Login: React.FC = () => {
   const [showToast1, setShowToast1] = useState(false);
@@ -11,10 +14,11 @@ const Login: React.FC = () => {
     const email = (document.getElementById("email") as HTMLInputElement).value;
     const password = (document.getElementById("password") as HTMLInputElement ).value;
     const response = await login(email, password);
-    if(response.ok)
+    if(response.ok) {
       setShowToast1(true);
-    const data = await response.json();
-    console.log(data);
+      const data = await response.json();
+      console.log(data);
+    }
   };
 
   return (
@@ -71,7 +75,7 @@ const Login: React.FC = () => {
             Login
           </IonButton>
           <p style={{ fontSize: "12px" }}>
-            Don't have an account? <IonRouterLink href="#">Sign Up</IonRouterLink>
+            Don't have an account? <IonRouterLink href="/registration">Sign Up</IonRouterLink>
           </p>
         </IonCol>
         <IonToast

@@ -8,14 +8,15 @@ const Login: React.FC = () => {
     const [showToast1, setShowToast1] = useState(false);
 
     const handleSignUp = async () => {
-    const username = (document.getElementById("username") as HTMLInputElement).value;
-    const email = (document.getElementById("email") as HTMLInputElement).value;
-    const password = (document.getElementById("password") as HTMLInputElement).value;
-    const response = await register(username, email, password);
-    if(response.ok)
-        setShowToast1(true);
-    const data = await response.json();
-    console.log(data);
+        const username = (document.getElementById("username") as HTMLInputElement).value;
+        const email = (document.getElementById("email") as HTMLInputElement).value;
+        const password = (document.getElementById("password") as HTMLInputElement).value;
+        const response = await register(username, email, password);
+        if(response.ok) {
+            setShowToast1(true);
+            const data = await response.json();
+            console.log(data);
+        }
     }; 
 
     return (
@@ -80,13 +81,13 @@ const Login: React.FC = () => {
             <IonRow>
                 <IonCol>
                 <p style={{ fontSize: "10px" }}>
-                    By clicking LOGIN you agree to our <a href="#">Policy</a>
+                    By clicking REGISTER you agree to our <a href="#">Policy</a>
                 </p>
                 <IonButton expand="block" onClick={ handleSignUp } >
-                    Login
+                    Register
                 </IonButton>
                 <p style={{ fontSize: "12px" }}>
-                    Don't have an account? <a href="#">Sign up!</a>
+                    Do you already have an account? <a href="#">Sign in!</a>
                 </p>
                 </IonCol>
                 <IonToast

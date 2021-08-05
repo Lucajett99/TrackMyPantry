@@ -1,45 +1,72 @@
-import { IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/react';
-import { IonReactRouter } from '@ionic/react-router';
-import { Redirect, Route } from 'react-router-dom';
-import { ellipse, square, triangle, apps } from 'ionicons/icons';
-import Tab1 from './Tab1';
-import Tab2 from './Tab2';
-import Tab3 from './Tab3';
+import { IonButton, IonItem, IonLabel, IonIcon, IonPage, IonFab, IonFabButton, IonList, IonItemSliding, IonItemOptions, IonItemOption } from "@ionic/react";
+import { addOutline } from 'ionicons/icons';
+import { useState, useEffect } from 'react';
+import { getProducts, usersMe } from "../request/API";
+import Card from '../components/Card';
+import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
+
 
 const Home: React.FC = () => {
+    const barcode = '8000500310427'; //nutella biscuits
+    const products = [{name: "Nutella", type: "dolce", quantity: 2}, {name: "Ketchup", type: "salsa", quantity: 5}, {name: "Fettina", type: "carne", quantity: 1}];
+    const cards: any = [];
+
+    
+    useEffect(() => {
+        (async () => {
+            const products = await getProducts(barcode);
+            if(!products)
+                return;
+            const data = await products.json();
+            console.log(data);
+        })();
+    },[]);
+
+    products.forEach((product) => {
+        cards.push(
+            <Card name={product.name} type={product.type} quantity={product.quantity}/>
+        );
+    });
+
+    const addProduct = async () => {
+        BarcodeScanner.hideBackground(); // make background of WebView transparent
+
+        const result = await BarcodeScanner.startScan(); // start scanning and wait for a result
+      
+        // if the result has content
+        if (result.hasContent) {
+          console.log(result.content); // log the raw scanned content
+        }
+    }
+    
+    /*const [scan, setScan] = useState({stringEncoded: ""});
+
+    const dataToScan = async () => {
+        const data = await BarcodeScanner.scan();
+        alert(JSON.stringify(data));
+        setScan({stringEncoded: data.text});
+      };
+  
+      const createCode = () => {
+        BarcodeScanner.encode(BarcodeScanner.Encode.TEXT_TYPE, "Hello World!")
+          .then(data => {
+            console.log(data);
+          }, error => {
+            console.log("Error : " + error);
+          });
+      };*/
+    
     return(
-        <IonReactRouter>
-        <IonTabs>
-          <IonRouterOutlet>
-            <Route exact path="/tab1">
-              <Tab1 />
-            </Route>
-            <Route exact path="/tab2">
-              <Tab2 />
-            </Route>
-            <Route path="/tab3">
-              <Tab3 />
-            </Route>
-            <Route exact path="/">
-              <Redirect to="/tab1" />
-            </Route>
-          </IonRouterOutlet>
-          <IonTabBar slot="bottom">
-            <IonTabButton tab="tab1" href="/tab1">
-              <IonIcon icon={apps} />
-              <IonLabel>Pantry</IonLabel>
-            </IonTabButton>
-            <IonTabButton tab="tab2" href="/tab2">
-              <IonIcon icon={ellipse} />
-              <IonLabel>Tab 2</IonLabel>
-            </IonTabButton>
-            <IonTabButton tab="tab3" href="/tab3">
-              <IonIcon icon={square} />
-              <IonLabel>Tab 3</IonLabel>
-            </IonTabButton>
-          </IonTabBar>
-        </IonTabs>
-      </IonReactRouter>
+        <IonPage>
+            <IonList>
+                {cards}
+            </IonList>
+            <IonFab vertical="bottom" horizontal="end" slot="fixed">
+                <IonFabButton size="small" onClick={addProduct}>
+                    <IonIcon icon={addOutline} />
+                </IonFabButton>
+            </IonFab>
+        </IonPage>
     );
 };
 export default Home;
