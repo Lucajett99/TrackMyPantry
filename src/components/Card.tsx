@@ -12,7 +12,7 @@ const useStyles = createUseStyles({
   card: {
     maxHeight: "auto",
     maxWidth: "auto",
-  },
+  }
 });
 
 const Card: React.FC<CardProps> = ({ name, type, quantity}) => {
