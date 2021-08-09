@@ -18,6 +18,7 @@ const Login: React.FC = () => {
       setShowToast1(true);
       const data = await response.json();
       console.log(data);
+      window.location.assign('/Home');
     }
   };
 

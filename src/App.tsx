@@ -4,6 +4,8 @@ import Login from './pages/Login';
 import Home from './pages/Home';
 import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
+import { getDate, getToken } from './request/utility';
+import { Storage } from '@capacitor/storage';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -23,27 +25,38 @@ import '@ionic/react/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import { useEffect, useState } from 'react';
 
-const App: React.FC = () => (
-  <IonApp>
-    {/*<Home /> 
-    <Login /> */}
-    <Home />
-  </IonApp>
-);
+const App: React.FC = () => {
+  const [path, setPath] = useState('');
+  useEffect(() => {
+    (async () => {
+      const token = await getToken();
+      const date = await getDate();
+      const today = new Date();
+      console.log(date);
+      console.log(today);
+      //const diffTime = Math.abs(today - date);
+      //console.log(diffTime);
+      if(token != null)
+        setPath('/home');
+      else
+        setPath('/login');
+    })();
+  }, [])
 
-/*
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonRouterOutlet>
-        <Route exact path="/login" component={Login} />
-        <Route path="/registration" component={Registration} />
-      </IonRouterOutlet>
-    </IonReactRouter>
- 
-  
-</IonApp>
-);*/
+  return(
+    <IonApp>
+      <IonReactRouter>
+        <IonRouterOutlet>
+          <Route exact path="/login" component={Login} />
+          <Route path="/registration" component={Registration} />
+          <Route path="/home" component={Home} />
+          <Redirect exact from="/" to={path} />
+        </IonRouterOutlet>
+      </IonReactRouter>  
+    </IonApp> 
+  );
+}
 
 export default App;

@@ -87,7 +87,7 @@ const Login: React.FC = () => {
                     Register
                 </IonButton>
                 <p style={{ fontSize: "12px" }}>
-                    Do you already have an account? <a href="#">Sign in!</a>
+                    Do you already have an account? <a href="/login">Sign in!</a>
                 </p>
                 </IonCol>
                 <IonToast
