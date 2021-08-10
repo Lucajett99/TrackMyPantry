@@ -5,7 +5,6 @@ import Home from './pages/Home';
 import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
 import { getDate, getToken } from './request/utility';
-import { Storage } from '@capacitor/storage';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -28,17 +27,14 @@ import './theme/variables.css';
 import { useEffect, useState } from 'react';
 
 const App: React.FC = () => {
-  const [path, setPath] = useState('');
+  const [path, setPath] = useState<any>('');
   useEffect(() => {
     (async () => {
       const token = await getToken();
-      const date = await getDate();
+      const date = new Date(await getDate());
       const today = new Date();
-      console.log(date);
-      console.log(today);
-      //const diffTime = Math.abs(today - date);
-      //console.log(diffTime);
-      if(token != null)
+      date.setDate(date.getDate() + 7);
+      if(token != null && date.getTime() > today.getTime())
         setPath('/home');
       else
         setPath('/login');

@@ -1,49 +1,93 @@
-import { IonRow, IonItem, IonButton, IonLabel, IonInput, IonCol, IonIcon, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import { personCircle } from 'ionicons/icons';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import React, { useState } from 'react';
 import { register } from '../request/API';
-import { IonToast } from '@ionic/react';
-import { useState } from 'react';
+import { IonGrid, IonRow, IonCol } from '@ionic/react';
+import { personCircle } from "ionicons/icons";
+import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
 
-const Login: React.FC = () => {
-    const [showToast1, setShowToast1] = useState(false);
+function validateEmail(email: string) {
+    const re = /^((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))$/;
+    return re.test(String(email).toLowerCase());
+}
 
-    const handleSignUp = async () => {
-        const username = (document.getElementById("username") as HTMLInputElement).value;
-        const email = (document.getElementById("email") as HTMLInputElement).value;
-        const password = (document.getElementById("password") as HTMLInputElement).value;
-        const response = await register(username, email, password);
-        if(response.ok) {
-            setShowToast1(true);
-            const data = await response.json();
-            console.log(data);
+const Registration: React.FC = () => {
+    const [username, setUsername] = useState<string>("Mario72");
+    const [email, setEmail] = useState<string>("mariorossi@hotmail.it");
+    const [password, setPassword] = useState<string>("Ciao1234");
+    const [iserror, setIserror] = useState<boolean>(false);
+    const [message, setMessage] = useState<string>("");
+
+    const handleLogin = async () => {
+        if (!username) {
+            setMessage("Please enter a valid username");
+            setIserror(true);
+            return;
         }
-    }; 
+        if (!email) {
+            setMessage("Please enter a valid email");
+            setIserror(true);
+            return;
+        }
+        if (validateEmail(email) === false) {
+            setMessage("Your email is invalid");
+            setIserror(true);
+            return;
+        }
+
+        if (!password || password.length < 6) {
+            setMessage("Please enter your password");
+            setIserror(true);
+            return;
+        }
+
+        const response = await register(username, email, password);
+            if(response.ok) {
+                const data = await response.json();
+                console.log(data);
+            }
+        else {
+            setMessage(response.status.toString());
+            setIserror(true);
+        }
+    };
 
     return (
         <IonPage>
-            <IonHeader>
-                <IonToolbar>
-                    <IonTitle>Sign up</IonTitle>
-                </IonToolbar>
-            </IonHeader>
-
+        <IonHeader>
+            <IonToolbar>
+            <IonTitle>Login</IonTitle>
+            </IonToolbar>
+        </IonHeader>
+        <IonContent fullscreen className="ion-padding ion-text-center">
+            <IonGrid>
             <IonRow>
-                <IonCol>
-                    <IonIcon
-                        style={{ fontSize: "70px", color: "#0040ff", marginLeft: "35%", marginRight: "35%" }}
-                        icon={personCircle}
-                    />
-                </IonCol>
+            <IonCol>
+                <IonAlert
+                    isOpen={iserror}
+                    onDidDismiss={() => setIserror(false)}
+                    cssClass="my-custom-class"
+                    header={"Error!"}
+                    message={message}
+                    buttons={["Dismiss"]}
+                />
+            </IonCol>
             </IonRow>
-
+            <IonRow>
+            <IonCol>
+                <IonIcon
+                    style={{ fontSize: "70px", color: "#0040ff" }}
+                    icon={personCircle}
+                />
+            </IonCol>
+            </IonRow>
             <IonRow>
                 <IonCol>
                     <IonItem>
                         <IonLabel position="floating"> Username</IonLabel>
                         <IonInput
                             type="text"
-                            id="username"
-                            //onIonChange={(e) => setEmail(e.detail.value!)}
+                            value={username}
+                            onIonChange={(e) => setUsername(e.detail.value!)}
                         >
                         </IonInput>
                     </IonItem>
@@ -56,8 +100,8 @@ const Login: React.FC = () => {
                         <IonLabel position="floating"> Email</IonLabel>
                         <IonInput
                             type="email"
-                            id="email"
-                            //onIonChange={(e) => setEmail(e.detail.value!)}
+                            value={email}
+                            onIonChange={(e) => setEmail(e.detail.value!)}
                         >
                         </IonInput>
                     </IonItem>
@@ -70,35 +114,29 @@ const Login: React.FC = () => {
                         <IonLabel position="floating"> Password</IonLabel>
                         <IonInput
                             type="password"
-                            id="password"
-                            //onIonChange={(e) => setPassword(e.detail.value!)}
+                            value={password}
+                            onIonChange={(e) => setPassword(e.detail.value!)}
                         >
                         </IonInput>
                     </IonItem>
                 </IonCol>
             </IonRow>
-
             <IonRow>
                 <IonCol>
-                <p style={{ fontSize: "10px" }}>
-                    By clicking REGISTER you agree to our <a href="#">Policy</a>
+                <p style={{ fontSize: "small" }}>
+                    By clicking LOGIN you agree to our <a href="#">Policy</a>
                 </p>
-                <IonButton expand="block" onClick={ handleSignUp } >
-                    Register
-                </IonButton>
-                <p style={{ fontSize: "12px" }}>
-                    Do you already have an account? <a href="/login">Sign in!</a>
+                <IonButton expand="block" onClick={handleLogin}>Login</IonButton>
+                <p style={{ fontSize: "small" }}>
+                    Do you already have an account?? <a href="/login">Sign in!</a>
                 </p>
+
                 </IonCol>
-                <IonToast
-                isOpen={showToast1}
-                onDidDismiss={() => setShowToast1(false)}
-                message="Sign up success!"
-                duration={500}
-                />
             </IonRow>
+            </IonGrid>
+        </IonContent>
         </IonPage>
     );
 };
 
-export default Login;
+export default Registration;

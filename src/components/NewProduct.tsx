@@ -1,47 +1,42 @@
 import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
 import React, { useState } from 'react';
-import { login } from '../request/API';
+import { postProduct } from '../request/API';
 import { IonGrid, IonRow, IonCol } from '@ionic/react';
 import { personCircle } from "ionicons/icons";
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
 
-function validateEmail(email: string) {
-    const re = /^((?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\]))$/;
-    return re.test(String(email).toLowerCase());
+interface ProductProps {
+    sessionToken: String;
 }
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState<string>("mariorossi@hotmail.it");
-  const [password, setPassword] = useState<string>("Ciao1234");
+const NewProduct: React.FC<ProductProps> = ({sessionToken}) => {
+  const [barcode, setBarcode] = useState<string>("0000000000");
+  const [name, setName] = useState<string>("xxxxxxxx");
+  const [description, setDescription] = useState<string>("xxxxxxxx");
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
   const handleLogin = async () => {
-    if (!email) {
-        setMessage("Please enter a valid email");
+    if (!barcode) {
+        setMessage("Please enter a valid barcode");
         setIserror(true);
         return;
     }
-    if (validateEmail(email) === false) {
-        setMessage("Your email is invalid");
+    if (!name) {
+        setMessage("Please enter the name of the product");
+        setIserror(true);
+        return;
+    }
+    if (!description) {
+        setMessage("Please enter the description of the product");
         setIserror(true);
         return;
     }
 
-    if (!password || password.length < 6) {
-        setMessage("Please enter your password");
-        setIserror(true);
-        return;
-    }
-
-    const response = await login(email, password);
+    const response = await postProduct(sessionToken, name, description, barcode, true);
     if(response.ok) {
       const data = await response.json();
-      window.location.assign('/Home');
-    }
-    else if(response.status == 401) {
-      setMessage("The email address or password is incorrect");
-      setIserror(true);
+      console.log(data);
     }
     else {
       setMessage(response.status.toString());
@@ -81,11 +76,11 @@ const Login: React.FC = () => {
           <IonRow>
             <IonCol>
             <IonItem>
-            <IonLabel position="floating"> Email</IonLabel>
+            <IonLabel position="floating"> Barcode</IonLabel>
             <IonInput
-                type="email"
-                value={email}
-                onIonChange={(e) => setEmail(e.detail.value!)}
+                type="text"
+                value={barcode}
+                onIonChange={(e) => setBarcode(e.detail.value!)}
                 >
             </IonInput>
             </IonItem>
@@ -95,26 +90,28 @@ const Login: React.FC = () => {
           <IonRow>
             <IonCol>
             <IonItem>
-              <IonLabel position="floating"> Password</IonLabel>
+              <IonLabel position="floating"> Name</IonLabel>
               <IonInput
-                type="password"
-                value={password}
-                onIonChange={(e) => setPassword(e.detail.value!)}
+                type="text"
+                value={name}
+                onIonChange={(e) => setName(e.detail.value!)}
                 >
               </IonInput>
             </IonItem>
             </IonCol>
           </IonRow>
+
           <IonRow>
             <IonCol>
-              <p style={{ fontSize: "small" }}>
-                  By clicking LOGIN you agree to our <a href="#">Policy</a>
-              </p>
-              <IonButton expand="block" onClick={handleLogin}>Login</IonButton>
-              <p style={{ fontSize: "small" }}>
-                  Don't have an account? <a href="/registration">Sign up!</a>
-              </p>
-
+            <IonItem>
+              <IonLabel position="floating"> Description</IonLabel>
+              <IonInput
+                type="text"
+                value={description}
+                onIonChange={(e) => setDescription(e.detail.value!)}
+                >
+              </IonInput>
+            </IonItem>
             </IonCol>
           </IonRow>
         </IonGrid>
@@ -123,4 +120,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default NewProduct;

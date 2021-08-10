@@ -1,4 +1,4 @@
-import { setToken, getToken, setDate, getDate } from '../request/utility';
+import { setToken, getToken, setDate, getDate } from './utility'
 const baseURL = 'https://cors-anywhere.herokuapp.com/https://lam21.modron.network';
 
 
