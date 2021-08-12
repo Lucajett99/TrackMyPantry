@@ -1,11 +1,17 @@
-import { IonButton, IonItem, IonLabel, IonAlert, IonIcon, IonPage, IonFab, IonFabButton, IonList, IonModal, IonContent, IonInput } from "@ionic/react";
+import { IonButton, IonItem, IonLabel, IonAlert, IonIcon, IonPage, IonFab, IonFabButton, IonList, IonModal, IonContent, IonInput, useIonViewWillEnter } from "@ionic/react";
 import { addOutline, closeOutline } from 'ionicons/icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getProducts } from "../request/API";
 import Card from '../components/Card';
+import NewProduct from "../components/NewProduct";
+import { Plugins, Capacitor } from '@capacitor/core';
+import { SQLiteConnection } from '@capacitor-community/sqlite';
 import { Storage } from '@capacitor/storage';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import NewProduct from "../components/NewProduct";
+import { plugins } from "pretty-format";
+
+const { CapacitorSQLite } = Plugins;
+
 
 const Home: React.FC = () => {
     //const barcode = '8000500310427'; //nutella biscuits
@@ -14,15 +20,26 @@ const Home: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [alert, setAlert] = useState<boolean>(false);
     const [message, setMessage] = useState<string>("");
-    const [newP, setNewP] = useState<Boolean>(false);
+    const [sessionToken, setSessionToken] = useState<String>("");
+    const [newP, setNewP] = useState<Boolean>(false)
+
+    /*useEffect(() => {
+        const initdb = async() => {
+            //get plugin
+            const mySQLite = new SQLiteConnection(CapacitorSQLite);
+
+            const db: any = await mySQLite.createConnection("test-db", false, "no-encryption", 1);
+            setMessage(JSON.stringify(db, null, 3));
+            setAlert(true);
+        };
+        initdb().then(() => {
+            console.log('inizialized');
+        });        
+    }, [])*/
 
     const closeModal = async () => {
         setShowModal(false);
         setProducts([]);
-    }
-
-    const addProduct = () => {
-
     }
 
     const checkProduct = async () => {
@@ -32,21 +49,22 @@ const Home: React.FC = () => {
                 const response = await getProducts(barcode);
                 if(response && response.ok) {
                     const data = await response.json();
-                    if(data.products.lenght > 0) {
+                    if(data.products.length > 0) {
                         const tmp: any = [];
                         data.products.forEach((product: any) => {
                             tmp.push(
                                 <Card name={product.name} type={product.description} quantity={product.barcode}/>
                             )
                         })
+                        setSessionToken(data.token);
+                        tmp.push(<IonButton onClick={() => setNewP(true)}> Add new product </IonButton>)
                         setProducts(tmp);
-                        console.log(data);
+                        setModalContent(<IonContent><IonList> {tmp} </IonList></IonContent>);
                     }
                     else {
                         setMessage("The product you are looking for is not present, do you want to add it?");
                         setAlert(true);
-                        const sessionToken = data.token;
-                        //addProduct(barcode, sessionToken);
+                        setSessionToken(data.token);
                     }
                 }
             }
@@ -60,6 +78,35 @@ const Home: React.FC = () => {
         }*/
     }
 
+    const [modalContent, setModalContent] = useState<any>();
+    const base = (
+        <IonContent>
+            <IonItem style={{marginTop: "40%", marginBottom: "40%"}}>
+                <IonLabel position="floating"> Barcode </IonLabel>
+                <IonInput
+                    type="text"
+                    id="input-barcode"
+                    color="primary"
+                    style={{backgroundColor: "white"}}
+                />
+            </IonItem>
+            <IonButton onClick={checkProduct}>CHECK</IonButton>
+        </IonContent>
+    );
+
+    useEffect(() => {
+        if(showModal)
+            setModalContent(base);
+    }, [showModal]);
+
+    useEffect(() => {
+        console.log(sessionToken);
+        if(newP)
+            setModalContent(<NewProduct sessionToken={sessionToken} closeModal={closeModal} setNewP={setNewP}/>);
+        else
+            setModalContent(base);
+    }, [newP]);
+
     return(
         <IonPage>
             <IonAlert
@@ -68,7 +115,7 @@ const Home: React.FC = () => {
                     cssClass="my-custom-class"
                     header={"Alert!"}
                     message={message}
-                    buttons={[{ text: 'Yes', handler: addProduct }, "No"]}
+                    buttons={[{ text: 'Yes', handler: () => setNewP(true) }, "No"]}
             />
             <IonContent>
                 <IonList>
@@ -87,20 +134,7 @@ const Home: React.FC = () => {
                             <IonIcon icon={closeOutline} />
                         </IonFabButton>
                     </IonFab>
-                    <IonContent id="products-list" style={{overflow: "hidden"}}>
-                        { !products.length ?
-                            <IonItem style={{marginTop: "40%", marginBottom: "40%"}}>
-                                <IonLabel position="floating"> Barcode </IonLabel>
-                                <IonInput
-                                    type="text"
-                                    id="input-barcode"
-                                    color="primary"
-                                    style={{backgroundColor: "white"}}
-                                />
-                            </IonItem>
-                        : <IonList> {products} </IonList>}
-                    </IonContent> 
-                    <IonButton onClick={checkProduct}>CHECK</IonButton>
+                    {modalContent}
                 </IonModal>
             </IonContent>
         </IonPage>

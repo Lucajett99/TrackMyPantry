@@ -43,12 +43,9 @@ export async function register(username: String, email: String, password: String
 //get products
 export async function getProducts(barcode: String) {
         const data = await getToken();
-        const date = await getDate();
         if(!data)
                 return null;
-        console.log(date)
         const { accessToken } = await getToken();
-        console.log(accessToken)
         const requestOptions = {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
@@ -61,9 +58,16 @@ export async function getProducts(barcode: String) {
 //post products
 export async function postProduct(token: any, name: any, description: any, barcode: any, test: boolean) {
         const productData = {
-                username: barcode
+                token: token,
+                barcode: barcode,
+                name: name,
+                description: description,
+                test: test
         };
-        const accessToken = await getToken() || '';
+        const data = await getToken();
+        if(!data)
+                return null;
+        const { accessToken } = await getToken();
         const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
@@ -74,15 +78,23 @@ export async function postProduct(token: any, name: any, description: any, barco
         return response;
 }
 
-
-export async function usersMe() {
+//votes
+export async function postVotes(token: any, rating: any, productId: String) {
+        const productData = {
+                token: token,
+                rating: rating,
+                productId: productId
+        };
+        const data = await getToken();
+        if(!data)
+                return null;
         const { accessToken } = await getToken();
         const requestOptions = {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json', 'accessToken': accessToken },
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+                body: JSON.stringify(productData)
             };
-        const response = await fetch(baseURL + '/users/me', requestOptions);
+        const response = await fetch(baseURL + '/votes', requestOptions);
         console.log(response.status);
         return response;
 }
-

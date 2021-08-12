@@ -1,22 +1,24 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonContent, IonPage, IonFab, IonFabButton } from '@ionic/react';
 import React, { useState } from 'react';
 import { postProduct } from '../request/API';
 import { IonGrid, IonRow, IonCol } from '@ionic/react';
-import { personCircle } from "ionicons/icons";
+import { closeOutline } from "ionicons/icons";
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
 
 interface ProductProps {
     sessionToken: String;
+    closeModal: any;
+    setNewP: any;
 }
 
-const NewProduct: React.FC<ProductProps> = ({sessionToken}) => {
+const NewProduct: React.FC<ProductProps> = ({sessionToken, closeModal, setNewP}) => {
   const [barcode, setBarcode] = useState<string>("0000000000");
   const [name, setName] = useState<string>("xxxxxxxx");
   const [description, setDescription] = useState<string>("xxxxxxxx");
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
-  const handleLogin = async () => {
+  const handleAddProduct = async () => {
     if (!barcode) {
         setMessage("Please enter a valid barcode");
         setIserror(true);
@@ -34,24 +36,27 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken}) => {
     }
 
     const response = await postProduct(sessionToken, name, description, barcode, true);
-    if(response.ok) {
-      const data = await response.json();
-      console.log(data);
+    if(response) {
+      if(response.ok) {
+        const data = await response.json();
+        console.log(data);
+      }
+      else {
+        setMessage(response.status.toString());
+        setIserror(true);
+      }
     }
-    else {
-      setMessage(response.status.toString());
-      setIserror(true);
-    }
+    setNewP(false);
   };
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Login</IonTitle>
-        </IonToolbar>
-      </IonHeader>
       <IonContent fullscreen className="ion-padding ion-text-center">
+      <IonFab vertical="top" horizontal="end" slot="fixed">
+          <IonFabButton size="small" onClick={closeModal}>
+              <IonIcon icon={closeOutline} />
+          </IonFabButton>
+      </IonFab>
         <IonGrid>
         <IonRow>
           <IonCol>
@@ -62,14 +67,6 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken}) => {
                 header={"Error!"}
                 message={message}
                 buttons={["Dismiss"]}
-            />
-          </IonCol>
-        </IonRow>
-        <IonRow>
-          <IonCol>
-            <IonIcon
-                style={{ fontSize: "70px", color: "#0040ff" }}
-                icon={personCircle}
             />
           </IonCol>
         </IonRow>
@@ -115,6 +112,7 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken}) => {
             </IonCol>
           </IonRow>
         </IonGrid>
+        <IonButton onClick={handleAddProduct}>ADD</IonButton>
       </IonContent>
     </IonPage>
   );

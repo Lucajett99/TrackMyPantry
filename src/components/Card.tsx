@@ -23,16 +23,28 @@ const Card: React.FC<CardProps> = ({ name, type, quantity}) => {
     //save in the database
   }
 
+  /*
+  {
+    name: name,
+    barcode: barcode,
+    description: description,
+    image: image,
+    quantity: quantity,
+    expiration: expiration
+  }
+  */
+
   return(
       <IonCard className={classes.card}>
         <IonItem  style={{fontSize: '10px'}}>
           <IonLabel> {name} </IonLabel>
-          <IonButton fill="outline" slot="end"> Add </IonButton>
+          <IonButton fill="outline" slot="end" onClick={addProduct}> Add </IonButton>
         </IonItem>
         <IonCardContent>
           <IonItem style={{float: 'left'}}> {type} </IonItem>
           {/*<IonImg src={imgURL} /> */}
           <IonItem style={{float: 'right'}}> {quantity} </IonItem>
+
         </IonCardContent>
       </IonCard>
   );
