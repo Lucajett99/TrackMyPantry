@@ -1,34 +1,14 @@
 import { Storage } from '@capacitor/storage';
 
-export const addDays = (date: Date, days: any) => {
-    var result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
-}
-
-export const setToken = async (token: any) => {
+export const setValue = async (key: string, value: any) => {
     await Storage.set({
-      key: 'accessToken',
-      value: JSON.stringify(token),
+      key: key,
+      value: JSON.stringify(value),
     });
 
 };
 
-export const setDate = async () => {
-    const date: Date =  new Date();
-    await Storage.set({
-      key: 'date',
-      value: JSON.stringify(date),
-    });
-
-};
-
-export const getToken = async () => {
-    const { value } = await Storage.get({ key: 'accessToken' });
-    return value ? JSON.parse(value) : null;
-};
-
-export const getDate = async () => {
-    const { value } = await Storage.get({ key: 'date' });
+export const getValue = async (key: string) => {
+    const { value } = await Storage.get({ key: key });
     return value ? JSON.parse(value) : null;
 };

@@ -1,7 +1,5 @@
-import { setToken, getToken, setDate, getDate } from './utility'
+import { setValue, getValue } from './utility'
 const baseURL = 'https://cors-anywhere.herokuapp.com/https://lam21.modron.network';
-
-
 
 //sign in
 export async function login(email: String, password: String) {
@@ -17,8 +15,8 @@ export async function login(email: String, password: String) {
         const response = await fetch(baseURL + '/auth/login', requestOptions);
         if(response.ok) {
                 const token = await response.clone().json();
-                await setToken(token);
-                await setDate();
+                await setValue("accessToken", token);
+                await setValue("date", new Date());
         }
         return response;
 }
@@ -42,10 +40,10 @@ export async function register(username: String, email: String, password: String
 
 //get products
 export async function getProducts(barcode: String) {
-        const data = await getToken();
+        const data = await getValue("accessToken");
         if(!data)
                 return null;
-        const { accessToken } = await getToken();
+        const { accessToken } = data;
         const requestOptions = {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
@@ -64,10 +62,10 @@ export async function postProduct(token: any, name: any, description: any, barco
                 description: description,
                 test: test
         };
-        const data = await getToken();
+        const data = await getValue("accessToken");
         if(!data)
                 return null;
-        const { accessToken } = await getToken();
+        const { accessToken } = data;
         const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
@@ -85,15 +83,15 @@ export async function postVotes(token: any, rating: any, productId: String) {
                 rating: rating,
                 productId: productId
         };
-        const data = await getToken();
+        const data = await getValue("accessToken");
         if(!data)
                 return null;
-        const { accessToken } = await getToken();
+        const { accessToken } = data;
         const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
                 body: JSON.stringify(productData)
-            };
+        };
         const response = await fetch(baseURL + '/votes', requestOptions);
         console.log(response.status);
         return response;

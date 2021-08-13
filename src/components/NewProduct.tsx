@@ -57,7 +57,7 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, closeModal, setNewP})
               <IonIcon icon={closeOutline} />
           </IonFabButton>
       </IonFab>
-        <IonGrid>
+        <IonGrid style={{marginTop: "40%"}}>
         <IonRow>
           <IonCol>
             <IonAlert
