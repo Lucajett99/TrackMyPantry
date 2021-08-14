@@ -55,7 +55,7 @@ const Registration: React.FC = () => {
         <IonPage>
         <IonHeader>
             <IonToolbar>
-            <IonTitle>Login</IonTitle>
+            <IonTitle>Registration</IonTitle>
             </IonToolbar>
         </IonHeader>
         <IonContent fullscreen className="ion-padding ion-text-center">

@@ -1,9 +1,11 @@
-import { IonApp, IonRouterOutlet } from '@ionic/react';
+import { IonApp, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonTabs, IonLabel } from '@ionic/react';
 import Registration from './pages/Registration';
 import Login from './pages/Login';
 import Home from './pages/Home';
+import Profile from './pages/Profile';
 import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
+import { homeOutline, personOutline } from "ionicons/icons";
 import { getValue } from './request/utility';
 
 /* Core CSS required for Ionic components to work properly */
@@ -44,6 +46,42 @@ const App: React.FC = () => {
   return(
     <IonApp>
       <IonReactRouter>
+        <IonTabs>
+          <IonRouterOutlet>
+            <Route exact path="/home">
+              <Home />
+            </Route>
+            <Route exact path="/profile">
+              <Profile />
+            </Route>
+            <Route exact path="/">
+              <Redirect to={path} />
+            </Route>
+            <Route exact path="/login" component={Login} />
+            <Route path="/registration" component={Registration} />
+          </IonRouterOutlet>
+          <IonTabBar slot="bottom">
+            <IonTabButton tab="home" href="/home">
+              <IonIcon icon={homeOutline} />
+              <IonLabel> Home </IonLabel>
+            </IonTabButton>
+            <IonTabButton tab="profile" href="/profile">
+              <IonIcon icon={personOutline} />
+              <IonLabel> Profile </IonLabel>
+            </IonTabButton>
+          </IonTabBar>
+        </IonTabs>
+      </IonReactRouter>  
+    </IonApp> 
+  );
+}
+
+export default App;
+
+/*
+
+<IonApp>
+      <IonReactRouter>
         <IonRouterOutlet>
           <Route exact path="/login" component={Login} />
           <Route path="/registration" component={Registration} />
@@ -51,8 +89,7 @@ const App: React.FC = () => {
           <Redirect exact from="/" to={path} />
         </IonRouterOutlet>
       </IonReactRouter>  
-    </IonApp> 
-  );
-}
+    </IonApp>
 
-export default App;
+
+*/

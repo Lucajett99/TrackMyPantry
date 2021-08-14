@@ -54,11 +54,12 @@ export async function getProducts(barcode: String) {
 }
 
 //post products
-export async function postProduct(token: any, name: any, description: any, barcode: any, test: boolean) {
+export async function postProduct(token: any, name: any, description: any, barcode: any, test: boolean, image?: any) {
         const productData = {
                 token: token,
                 barcode: barcode,
                 name: name,
+                img: image,
                 description: description,
                 test: test
         };
@@ -70,7 +71,7 @@ export async function postProduct(token: any, name: any, description: any, barco
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
                 body: JSON.stringify(productData)
-            };
+        };
         const response = await fetch(baseURL + '/products', requestOptions);
         console.log(response.status);
         return response;

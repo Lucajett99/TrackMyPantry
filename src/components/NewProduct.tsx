@@ -1,29 +1,25 @@
-import { IonContent, IonPage, IonFab, IonFabButton } from '@ionic/react';
+import { IonContent, IonPage, IonFab, IonFabButton, IonTextarea, IonImg } from '@ionic/react';
 import React, { useState } from 'react';
 import { postProduct } from '../request/API';
+import { takePicture } from '../request/utility';
 import { IonGrid, IonRow, IonCol } from '@ionic/react';
-import { closeOutline } from "ionicons/icons";
+import { closeOutline, phonePortrait } from "ionicons/icons";
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
-
 interface ProductProps {
     sessionToken: String;
+    barcode: String;
     closeModal: any;
     setNewP: any;
 }
 
-const NewProduct: React.FC<ProductProps> = ({sessionToken, closeModal, setNewP}) => {
-  const [barcode, setBarcode] = useState<string>("0000000000");
+const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, setNewP}) => {
   const [name, setName] = useState<string>("xxxxxxxx");
   const [description, setDescription] = useState<string>("xxxxxxxx");
+  const [image, setImage] = useState<any>("");
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
 
   const handleAddProduct = async () => {
-    if (!barcode) {
-        setMessage("Please enter a valid barcode");
-        setIserror(true);
-        return;
-    }
     if (!name) {
         setMessage("Please enter the name of the product");
         setIserror(true);
@@ -35,7 +31,7 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, closeModal, setNewP})
         return;
     }
 
-    const response = await postProduct(sessionToken, name, description, barcode, true);
+    const response = await postProduct(sessionToken, name, description, barcode, true, image ? image : null);
     if(response) {
       if(response.ok) {
         const data = await response.json();
@@ -48,6 +44,14 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, closeModal, setNewP})
     }
     setNewP(false);
   };
+
+  const handlePicture = async () => {
+    const image = await takePicture();
+    if(image){ 
+      const convertedImage= "data:image/jpeg;base64," + image.base64String;
+      setImage(convertedImage);
+    }
+  }
 
   return (
     <IonPage>
@@ -70,45 +74,37 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, closeModal, setNewP})
             />
           </IonCol>
         </IonRow>
-          <IonRow>
+        <IonRow>
             <IonCol>
-            <IonItem>
-            <IonLabel position="floating"> Barcode</IonLabel>
-            <IonInput
-                type="text"
-                value={barcode}
-                onIonChange={(e) => setBarcode(e.detail.value!)}
-                >
-            </IonInput>
+              <IonItem>
+                <IonImg src={image} />
+                <IonFab vertical="center" horizontal="center">
+                    <IonFabButton size="small" onClick={handlePicture}>
+                        <IonIcon icon={phonePortrait} />
+                    </IonFabButton>
+                </IonFab>
+            </IonItem>
+            </IonCol>
+          </IonRow>
+        <IonRow>
+            <IonCol>
+              <IonItem>
+                <IonLabel position="floating"> Name</IonLabel>
+                <IonInput
+                  type="text"
+                  value={name}
+                  onIonChange={(e) => setName(e.detail.value!)}
+                />
             </IonItem>
             </IonCol>
           </IonRow>
 
           <IonRow>
             <IonCol>
-            <IonItem>
-              <IonLabel position="floating"> Name</IonLabel>
-              <IonInput
-                type="text"
-                value={name}
-                onIonChange={(e) => setName(e.detail.value!)}
-                >
-              </IonInput>
-            </IonItem>
-            </IonCol>
-          </IonRow>
-
-          <IonRow>
-            <IonCol>
-            <IonItem>
-              <IonLabel position="floating"> Description</IonLabel>
-              <IonInput
-                type="text"
-                value={description}
-                onIonChange={(e) => setDescription(e.detail.value!)}
-                >
-              </IonInput>
-            </IonItem>
+              <IonItem>
+                <IonLabel position="floating"> Description</IonLabel>
+                <IonTextarea value={description} onIonChange={(e) => setDescription(e.detail.value!)}/>
+              </IonItem>
             </IonCol>
           </IonRow>
         </IonGrid>

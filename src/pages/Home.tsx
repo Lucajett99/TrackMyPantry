@@ -23,10 +23,11 @@ const Home: React.FC = () => {
     const [alert, setAlert] = useState<boolean>(false);
     const [message, setMessage] = useState<string>("");
     const [sessionToken, setSessionToken] = useState<String>("");
+    const [barcode, setBarcode] = useState<String>("");
     const [newP, setNewP] = useState<Boolean>(false)
     const history = useHistory();
  
-    useEffect(() => {
+    /*useEffect(() => {
         const initdb = async() => {
             //get plugin
             const mySQLite = new SQLiteConnection(CapacitorSQLite);
@@ -39,7 +40,7 @@ const Home: React.FC = () => {
         initdb().then(() => {
             console.log('inizialized');
         });        
-    }, []);
+    }, []);*/
 
     const closeModal = async () => {
         setNewP(false);
@@ -49,19 +50,20 @@ const Home: React.FC = () => {
 
     const checkProduct = async () => {
         if(showModal) {
-            const barcode = document.getElementById("input-barcode") ? (document.getElementById("input-barcode") as HTMLInputElement).value : null;
-            if(barcode) {
-                const response = await getProducts(barcode);
+            const myBarcode = document.getElementById("input-barcode") ? (document.getElementById("input-barcode") as HTMLInputElement).value : null;
+            if(myBarcode) {
+                const response = await getProducts(myBarcode);
                 if(response && response.ok) {
                     const data = await response.json();
                     if(data.products.length > 0) {
                         const tmp: any = [];
                         data.products.forEach((product: any) => {
                             tmp.push(
-                                <Card name={product.name} description={product.description} quantity={product.barcode}/>
+                                <Card name={product.name} description={product.description} image={product.img}/>
                             )
                         })
                         setSessionToken(data.token);
+                        setBarcode(myBarcode);
                         tmp.push(<IonRow style={{textAlign: "center"}}><IonCol><IonButton onClick={() => setNewP(true)}> Add new product </IonButton></IonCol></IonRow>)
                         setProducts(tmp);
                         setModalContent(<IonContent><IonGrid> {tmp} </IonGrid></IonContent>);
@@ -70,6 +72,7 @@ const Home: React.FC = () => {
                         setMessage("The product you are looking for is not present, do you want to add it?");
                         setAlert(true);
                         setSessionToken(data.token);
+                        setBarcode(myBarcode);
                     }
                 }
             }
@@ -114,7 +117,7 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         if(newP)
-            setModalContent(<NewProduct sessionToken={sessionToken} closeModal={closeModal} setNewP={setNewP}/>);
+            setModalContent(<NewProduct sessionToken={sessionToken} barcode={barcode} closeModal={closeModal} setNewP={setNewP}/>);
         else
             setModalContent(base);
     }, [newP]);
@@ -155,17 +158,17 @@ const Home: React.FC = () => {
                     </IonFabButton>
                 </IonFab>
                 <IonModal isOpen={showModal} cssClass='my-custom-class'>
-                    <IonFooter>
-                        <IonToolbar>
-                            <IonTitle class="ion-text-center">Add a product</IonTitle>
-                        </IonToolbar>
-                    </IonFooter>
                     <IonFab vertical="top" horizontal="end" slot="fixed">
                         <IonFabButton size="small" onClick={closeModal}>
                             <IonIcon icon={closeOutline} />
                         </IonFabButton>
                     </IonFab>
                     {modalContent}
+                    <IonFooter>
+                        <IonToolbar>
+                            <IonTitle class="ion-text-center">Add a product</IonTitle>
+                        </IonToolbar>
+                    </IonFooter>
                 </IonModal>
             </IonContent>
         </IonPage>
