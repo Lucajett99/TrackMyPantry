@@ -1,46 +1,42 @@
-import { IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonAlert, IonIcon, IonPage, IonFab, IonFabButton, IonList, IonModal, IonContent, IonInput, IonHeader, IonToolbar, IonTitle, IonFooter } from "@ionic/react";
+import { IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonAlert, IonIcon, IonPage, IonFab, IonFabButton, IonList, IonModal, IonContent, IonInput, IonHeader, IonToolbar, IonTitle, IonFooter, useIonLoading } from "@ionic/react";
 import { addOutline, closeOutline } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
 import { getProducts } from "../request/API";
+import { initDatabase, QueryGetProducts } from "../request/Database";
 import Card from '../components/Card';
+import LocalCard from '../components/LocalCard';
 import NewProduct from "../components/NewProduct";
 import { Plugins, Capacitor } from '@capacitor/core';
 import { SQLiteConnection } from '@capacitor-community/sqlite';
 import { Storage } from '@capacitor/storage';
 import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { plugins } from "pretty-format";
 import { useHistory } from "react-router";
 
 const { CapacitorSQLite } = Plugins;
+const mySQLite = new SQLiteConnection(CapacitorSQLite);
 
 
 const Home: React.FC = () => {
-    //const barcode = '8000500310427'; //nutella biscuits
-    //const tmp : any= [<p>ciao1</p>, <p>ciao2</p>, <p>ciao3</p>, <p>ciao4</p>];
-    const [cards, setCards] = useState([]);
     const [products, setProducts] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [alert, setAlert] = useState<boolean>(false);
     const [message, setMessage] = useState<string>("");
     const [sessionToken, setSessionToken] = useState<String>("");
     const [barcode, setBarcode] = useState<String>("");
-    const [newP, setNewP] = useState<Boolean>(false)
+    const [newP, setNewP] = useState<Boolean>(false);
+    const [queryResults, setQueryResults] = useState<any>(null);
+    const [show, dismiss] = useIonLoading();
     const history = useHistory();
- 
-    /*useEffect(() => {
-        const initdb = async() => {
-            //get plugin
-            const mySQLite = new SQLiteConnection(CapacitorSQLite);
+    
+    const setHome = async () => {
+        await initDatabase();
+        const query = await QueryGetProducts();
+        setQueryResults(query);
+    };
 
-            const db = await mySQLite.createConnection("test-db", false, "no-encryption", 1);
-            mySQLite.importFromJson("");
-            setMessage(JSON.stringify(db, null, 3));
-            setAlert(true);
-        };
-        initdb().then(() => {
-            console.log('inizialized');
-        });        
-    }, []);*/
+    useEffect(() => {
+        setHome();
+    }, []);      
 
     const closeModal = async () => {
         setNewP(false);
@@ -49,17 +45,19 @@ const Home: React.FC = () => {
     }
 
     const checkProduct = async () => {
+        show("Loading");
         if(showModal) {
             const myBarcode = document.getElementById("input-barcode") ? (document.getElementById("input-barcode") as HTMLInputElement).value : null;
             if(myBarcode) {
                 const response = await getProducts(myBarcode);
-                if(response && response.ok) {
+                if(response?.ok) {
                     const data = await response.json();
+                    console.log(data);
                     if(data.products.length > 0) {
                         const tmp: any = [];
                         data.products.forEach((product: any) => {
                             tmp.push(
-                                <Card name={product.name} description={product.description} image={product.img}/>
+                                <Card barcode={product.barcode} id={product.id} sessionToken={data.token} name={product.name} description={product.description} image={product.img} setQueryResult={setQueryResults} closeModal={closeModal}/>
                             )
                         })
                         setSessionToken(data.token);
@@ -76,6 +74,7 @@ const Home: React.FC = () => {
                     }
                 }
             }
+            dismiss();
         }
 
         /*BarcodeScanner.hideBackground(); // make background of WebView transparent
@@ -97,7 +96,6 @@ const Home: React.FC = () => {
                             type="text"
                             id="input-barcode"
                             color="primary"
-                            style={{backgroundColor: "white"}}
                         />
                     </IonCol>
                 </IonRow>
@@ -134,12 +132,12 @@ const Home: React.FC = () => {
                     <IonRow>
                         <IonCol>
                             <IonAlert
-                                    isOpen={alert}
-                                    onDidDismiss={() => setAlert(false)}
-                                    cssClass="my-custom-class"
-                                    header={"Alert!"}
-                                    message={message}
-                                    buttons={[{ text: 'Yes', handler: () => setNewP(true) }, "No"]}
+                                isOpen={alert}
+                                onDidDismiss={() => setAlert(false)}
+                                cssClass="my-custom-class"
+                                header={"Alert!"}
+                                message={message}
+                                buttons={[{ text: 'Yes', handler: () => setNewP(true) }, "No"]}
                             />
                         </IonCol>
                     </IonRow>
@@ -147,12 +145,14 @@ const Home: React.FC = () => {
                     <IonRow>
                         <IonCol>
                             <IonList>
-                                {cards}
+                                {queryResults?.values?.map((product: any) => {
+                                    return <LocalCard id={product.id} barcode={product.barcode} name={product.name} description={product.description} image={product.image} quantity={product.quantity} setQueryResult={setQueryResults}/>
+                                })}
                             </IonList>
                         </IonCol>
                     </IonRow>
                 </IonGrid>
-                <IonFab vertical="bottom" horizontal="end">
+                <IonFab vertical="bottom" horizontal="end" slot="fixed">
                     <IonFabButton size="small" onClick={() => setShowModal(true)}>
                         <IonIcon icon={addOutline} />
                     </IonFabButton>

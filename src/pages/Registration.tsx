@@ -1,4 +1,4 @@
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar, useIonLoading } from '@ionic/react';
 import React, { useState } from 'react';
 import { register } from '../request/API';
 import { IonGrid, IonRow, IonCol } from '@ionic/react';
@@ -16,6 +16,7 @@ const Registration: React.FC = () => {
     const [password, setPassword] = useState<string>("Ciao1234");
     const [iserror, setIserror] = useState<boolean>(false);
     const [message, setMessage] = useState<string>("");
+    const [show, dismiss] = useIonLoading();
 
     const handleLogin = async () => {
         if (!username) {
@@ -40,6 +41,7 @@ const Registration: React.FC = () => {
             return;
         }
 
+        show("Loading");
         const response = await register(username, email, password);
             if(response.ok) {
                 const data = await response.json();
@@ -49,6 +51,7 @@ const Registration: React.FC = () => {
             setMessage(response.status.toString());
             setIserror(true);
         }
+        dismiss();
     };
 
     return (

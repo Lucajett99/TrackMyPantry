@@ -1,11 +1,11 @@
-import { IonApp, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonTabs, IonLabel } from '@ionic/react';
+import { IonApp, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonTabs, IonLabel, IonContent } from '@ionic/react';
 import Registration from './pages/Registration';
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import { IonReactRouter } from '@ionic/react-router';
 import { Redirect, Route } from 'react-router-dom';
-import { homeOutline, personOutline } from "ionicons/icons";
+import { homeOutline, personOutline } from 'ionicons/icons';
 import { getValue } from './request/utility';
 
 /* Core CSS required for Ionic components to work properly */
@@ -28,8 +28,11 @@ import '@ionic/react/css/display.css';
 import './theme/variables.css';
 import { useEffect, useState } from 'react';
 
+
+
 const App: React.FC = () => {
   const [path, setPath] = useState<any>('');
+
   useEffect(() => {
     (async () => {
       const token = await getValue("accessToken");
@@ -41,7 +44,8 @@ const App: React.FC = () => {
       else
         setPath('/login');
     })();
-  }, [])
+  }, []);
+
 
   return(
     <IonApp>
@@ -77,19 +81,3 @@ const App: React.FC = () => {
 }
 
 export default App;
-
-/*
-
-<IonApp>
-      <IonReactRouter>
-        <IonRouterOutlet>
-          <Route exact path="/login" component={Login} />
-          <Route path="/registration" component={Registration} />
-          <Route path="/home" component={Home} />
-          <Redirect exact from="/" to={path} />
-        </IonRouterOutlet>
-      </IonReactRouter>  
-    </IonApp>
-
-
-*/

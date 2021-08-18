@@ -1,9 +1,9 @@
-import { IonContent, IonPage, IonFab, IonFabButton, IonTextarea, IonImg } from '@ionic/react';
+import { IonContent, IonPage, IonFab, IonFabButton, IonTextarea, IonImg, useIonLoading } from '@ionic/react';
 import React, { useState } from 'react';
 import { postProduct } from '../request/API';
 import { takePicture } from '../request/utility';
 import { IonGrid, IonRow, IonCol } from '@ionic/react';
-import { closeOutline, phonePortrait } from "ionicons/icons";
+import { camera, closeOutline, phonePortrait } from "ionicons/icons";
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
 interface ProductProps {
     sessionToken: String;
@@ -18,6 +18,7 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
   const [image, setImage] = useState<any>("");
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+  const [show, dismiss] = useIonLoading();
 
   const handleAddProduct = async () => {
     if (!name) {
@@ -31,8 +32,10 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
         return;
     }
 
+    show("Loading");
     const response = await postProduct(sessionToken, name, description, barcode, true, image ? image : null);
     if(response) {
+      window.alert(response.ok)
       if(response.ok) {
         const data = await response.json();
         console.log(data);
@@ -43,13 +46,14 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
       }
     }
     setNewP(false);
+    dismiss();
   };
 
   const handlePicture = async () => {
-    const image = await takePicture();
-    if(image){ 
-      const convertedImage= "data:image/jpeg;base64," + image.base64String;
-      setImage(convertedImage);
+    const img = await takePicture();
+    if(img){
+      setImage(img.base64String);
+      window.alert(img)
     }
   }
 
@@ -77,13 +81,15 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
         <IonRow>
             <IonCol>
               <IonItem>
-                <IonImg src={image} />
-                <IonFab vertical="center" horizontal="center">
-                    <IonFabButton size="small" onClick={handlePicture}>
-                        <IonIcon icon={phonePortrait} />
-                    </IonFabButton>
-                </IonFab>
-            </IonItem>
+                <IonImg src={image ? "data:image/jpeg;base64," + image : '#'} />
+              </IonItem>
+            </IonCol>
+            <IonCol>
+              <IonFab vertical="center" horizontal="center">
+                  <IonFabButton size="small" onClick={handlePicture}>
+                      <IonIcon icon={camera} />
+                  </IonFabButton>
+              </IonFab>
             </IonCol>
           </IonRow>
         <IonRow>

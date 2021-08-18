@@ -1,5 +1,6 @@
-import { setValue, getValue } from './utility'
+import { setValue, getValue } from './utility';
 const baseURL = 'https://cors-anywhere.herokuapp.com/https://lam21.modron.network';
+
 
 //sign in
 export async function login(email: String, password: String) {
