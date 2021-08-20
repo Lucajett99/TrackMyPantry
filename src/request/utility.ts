@@ -11,7 +11,6 @@ export const setValue = async (key: string, value: any) => {
       key: key,
       value: JSON.stringify(value),
     });
-
 };
 
 /**
@@ -26,11 +25,17 @@ export const getValue = async (key: string) => {
 
 /**
  * 
+ */
+export const removeKey = async (key: string) => {
+  await Storage.remove({key});
+}
+
+/**
+ * 
  * @returns 
  */
 export const checkPermission = async () => {
   const permission = await Camera.checkPermissions();
-  window.alert(JSON.stringify(permission));
   return permission;
 }
 
@@ -41,7 +46,6 @@ export const checkPermission = async () => {
 export const requestPermission = async () => {
   const permissions: CameraPluginPermissions = {permissions : ['camera', 'photos']}
   const response = await Camera.requestPermissions(permissions);
-  window.alert(JSON.stringify(response));
   return response;
 }
 
@@ -50,18 +54,22 @@ export const requestPermission = async () => {
  * @returns 
  */
 export const takePicture = async () => {
-  const permission = await checkPermission();
-  if(permission.camera == 'granted') {
-    const image = await Camera.getPhoto({
-      quality: 90,
-      allowEditing: false,
-      resultType: CameraResultType.Base64
-    });
-    return image;
-  }
-  else {
-    await requestPermission();
-    await takePicture();
+  try {
+    const permission = await checkPermission();
+    if(permission.camera == 'granted') {
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Base64
+      });
+      return image.base64String;
+    }
+    else {
+      await requestPermission();
+      await takePicture();
+    }
+  } catch(error) {
+    throw Error("Permission Error");
   }
 };
 

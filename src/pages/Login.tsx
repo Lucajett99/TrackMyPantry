@@ -85,15 +85,15 @@ const Login: React.FC = () => {
         </IonRow>
           <IonRow>
             <IonCol>
-            <IonItem>
-            <IonLabel position="floating"> Email</IonLabel>
-            <IonInput
-                type="email"
-                value={email}
-                onIonChange={(e) => setEmail(e.detail.value!)}
-                >
-            </IonInput>
-            </IonItem>
+              <IonItem>
+                <IonLabel position="floating"> Email</IonLabel>
+                <IonInput
+                    type="email"
+                    value={email}
+                    onIonChange={(e) => setEmail(e.detail.value!)}
+                  >
+                </IonInput>
+              </IonItem>
             </IonCol>
           </IonRow>
 

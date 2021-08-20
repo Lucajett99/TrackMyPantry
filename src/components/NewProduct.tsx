@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { postProduct } from '../request/API';
 import { takePicture } from '../request/utility';
 import { IonGrid, IonRow, IonCol } from '@ionic/react';
-import { camera, closeOutline, phonePortrait } from "ionicons/icons";
+import { camera, closeOutline, closeCircleOutline } from "ionicons/icons";
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
 interface ProductProps {
     sessionToken: String;
@@ -15,7 +15,7 @@ interface ProductProps {
 const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, setNewP}) => {
   const [name, setName] = useState<string>("xxxxxxxx");
   const [description, setDescription] = useState<string>("xxxxxxxx");
-  const [image, setImage] = useState<any>("");
+  const [image, setImage] = useState<any>(null);
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [show, dismiss] = useIonLoading();
@@ -35,26 +35,24 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
     show("Loading");
     const response = await postProduct(sessionToken, name, description, barcode, true, image ? image : null);
     if(response) {
-      window.alert(response.ok)
+      console.log(response.ok)
       if(response.ok) {
         const data = await response.json();
         console.log(data);
+        setNewP(false);
       }
       else {
         setMessage(response.status.toString());
         setIserror(true);
       }
     }
-    setNewP(false);
     dismiss();
   };
 
   const handlePicture = async () => {
     const img = await takePicture();
-    if(img){
-      setImage(img.base64String);
-      window.alert(img)
-    }
+    if(img)
+      setImage(img);
   }
 
   return (
@@ -88,6 +86,13 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
               <IonFab vertical="center" horizontal="center">
                   <IonFabButton size="small" onClick={handlePicture}>
                       <IonIcon icon={camera} />
+                  </IonFabButton>
+              </IonFab>
+            </IonCol>
+            <IonCol>
+              <IonFab vertical="center" horizontal="center">
+                  <IonFabButton size="small" onClick={() => setImage(null)}>
+                      <IonIcon icon={closeCircleOutline} />
                   </IonFabButton>
               </IonFab>
             </IonCol>

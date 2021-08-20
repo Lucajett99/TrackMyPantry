@@ -1,10 +1,9 @@
 const now = parseInt(new Date().getTime() / 1000);
-console.log(now);
 const dataToImport = {
   database: "MyPantry",
   version: 1,
   encrypted: false,
-  mode: "full",
+  mode: "partial",
   tables: [
     {
       name: "products",

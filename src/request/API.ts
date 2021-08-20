@@ -35,6 +35,10 @@ export async function register(username: String, email: String, password: String
                 body: JSON.stringify(registerData)
             };
         const response = await fetch(baseURL + '/users', requestOptions);
+        if(response.ok) {
+                await setValue("email", email);
+                await setValue("username", username);
+        }
         console.log(response.status);
         return response;
 }
@@ -95,6 +99,21 @@ export async function postVotes(token: any, rating: any, productId: String) {
                 body: JSON.stringify(productData)
         };
         const response = await fetch(baseURL + '/votes', requestOptions);
+        console.log(response.status);
+        return response;
+}
+
+//get user detail
+export async function getUser() {
+        const data = await getValue("accessToken");
+        if(!data)
+                return null;
+        const { accessToken } = data;
+        const requestOptions = {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+            };
+        const response = await fetch(baseURL + '/users/me', requestOptions);
         console.log(response.status);
         return response;
 }

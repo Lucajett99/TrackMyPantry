@@ -23,7 +23,8 @@ const useStyles = createUseStyles({
   },
   image: {
     height: "100px",
-    width: "100%"
+    width: "100%",
+    marginTop: "10px"
   }
 });
 
@@ -45,7 +46,6 @@ const Card: React.FC<CardProps> = ({ barcode, id, sessionToken, name, descriptio
     const response = await postVotes(sessionToken, 1, id);
     setQueryResult(await QueryGetProducts());
     dismiss();
-    window.alert(response?.ok)
     if(response?.ok)
       closeModal();
   }

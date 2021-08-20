@@ -31,7 +31,7 @@ const Home: React.FC = () => {
     const setHome = async () => {
         await initDatabase();
         const query = await QueryGetProducts();
-        setQueryResults(query);
+        await setQueryResults(query);
     };
 
     useEffect(() => {
@@ -44,9 +44,37 @@ const Home: React.FC = () => {
         setProducts([]);
     }
 
-    const checkProduct = async () => {
-        show("Loading");
+    const onStartScan = async () => {
+        try {
+            // Ask and check for user permission
+            const { granted } = await BarcodeScanner.checkPermission({ force: true });
+            if (!granted) throw Error("Permission Error");
+    
+            // Hides all the WebView from user eyes, in order to let the user
+            // see the ScannerView below
+            document.body.style.background = "transparent";
+            document.body.style.opacity = "0";
+            BarcodeScanner.hideBackground();
+    
+            // Start scanning and wait for a result
+            const result = await BarcodeScanner.startScan();
+    
+            // If the result has content, then updates the product hint
+            if (result.hasContent) checkProduct(result.content);
+        } catch (err) {
+            // Presents an error message to the user
+            setMessage(err.message);
+        } finally {
+            // Reverts the WebView to the previous settings
+            document.body.style.background = "";
+            document.body.style.opacity = "1";
+            BarcodeScanner.showBackground();
+        }
+    };
+
+    const checkProduct = async (scanner?: any) => {
         if(showModal) {
+            show("Loading");
             const myBarcode = document.getElementById("input-barcode") ? (document.getElementById("input-barcode") as HTMLInputElement).value : null;
             if(myBarcode) {
                 const response = await getProducts(myBarcode);
@@ -64,7 +92,7 @@ const Home: React.FC = () => {
                         setBarcode(myBarcode);
                         tmp.push(<IonRow style={{textAlign: "center"}}><IonCol><IonButton onClick={() => setNewP(true)}> Add new product </IonButton></IonCol></IonRow>)
                         setProducts(tmp);
-                        setModalContent(<IonContent><IonGrid> {tmp} </IonGrid></IonContent>);
+                        await setModalContent(<IonContent><IonGrid> {tmp} </IonGrid></IonContent>);
                     }
                     else {
                         setMessage("The product you are looking for is not present, do you want to add it?");
@@ -95,7 +123,13 @@ const Home: React.FC = () => {
                         <IonInput
                             type="text"
                             id="input-barcode"
-                            color="primary"
+                            color="secondary"
+                        />
+                    </IonCol>
+                    <IonCol>
+                        <IonButton
+                            color="light"
+                            onClick={onStartScan}
                         />
                     </IonCol>
                 </IonRow>
@@ -164,11 +198,6 @@ const Home: React.FC = () => {
                         </IonFabButton>
                     </IonFab>
                     {modalContent}
-                    <IonFooter>
-                        <IonToolbar>
-                            <IonTitle class="ion-text-center">Add a product</IonTitle>
-                        </IonToolbar>
-                    </IonFooter>
                 </IonModal>
             </IonContent>
         </IonPage>
