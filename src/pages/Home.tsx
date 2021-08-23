@@ -1,30 +1,24 @@
-import { IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonAlert, IonIcon, IonPage, IonFab, IonFabButton, IonList, IonModal, IonContent, IonInput, IonHeader, IonToolbar, IonTitle, IonFooter, useIonLoading } from "@ionic/react";
-import { addOutline, closeOutline } from 'ionicons/icons';
+import { IonGrid, IonRow, IonCol, IonButton, IonItem, IonLabel, IonAlert, IonIcon, IonPage, IonFab, IonFabButton, IonList, IonModal, IonContent, IonInput, IonHeader, IonToolbar, IonTitle, IonFooter, useIonLoading, IonSearchbar } from "@ionic/react";
+import { addOutline, closeOutline, searchCircleOutline } from 'ionicons/icons';
 import { useEffect, useState } from 'react';
 import { getProducts } from "../request/API";
+import { onStartScan } from '../request/utility';
 import { initDatabase, QueryGetProducts } from "../request/Database";
 import Card from '../components/Card';
 import LocalCard from '../components/LocalCard';
 import NewProduct from "../components/NewProduct";
-import { Plugins, Capacitor } from '@capacitor/core';
-import { SQLiteConnection } from '@capacitor-community/sqlite';
-import { Storage } from '@capacitor/storage';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
 import { useHistory } from "react-router";
 
-const { CapacitorSQLite } = Plugins;
-const mySQLite = new SQLiteConnection(CapacitorSQLite);
-
-
 const Home: React.FC = () => {
-    const [products, setProducts] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [alert, setAlert] = useState<boolean>(false);
-    const [message, setMessage] = useState<string>("");
+    const [message, setMessage] = useState<any>("");
     const [sessionToken, setSessionToken] = useState<String>("");
     const [barcode, setBarcode] = useState<String>("");
     const [newP, setNewP] = useState<Boolean>(false);
+    const [searchText, setSearchText] = useState('');
     const [queryResults, setQueryResults] = useState<any>(null);
+    const [products, setProducts] = useState<any>(null);
     const [show, dismiss] = useIonLoading();
     const history = useHistory();
     
@@ -32,44 +26,20 @@ const Home: React.FC = () => {
         await initDatabase();
         const query = await QueryGetProducts();
         await setQueryResults(query);
-    };
-
-    useEffect(() => {
-        setHome();
-    }, []);      
+        await setProducts(query?.values);
+    };     
 
     const closeModal = async () => {
         setNewP(false);
         setShowModal(false);
-        setProducts([]);
     }
 
-    const onStartScan = async () => {
-        try {
-            // Ask and check for user permission
-            const { granted } = await BarcodeScanner.checkPermission({ force: true });
-            if (!granted) throw Error("Permission Error");
-    
-            // Hides all the WebView from user eyes, in order to let the user
-            // see the ScannerView below
-            document.body.style.background = "transparent";
-            document.body.style.opacity = "0";
-            BarcodeScanner.hideBackground();
-    
-            // Start scanning and wait for a result
-            const result = await BarcodeScanner.startScan();
-    
-            // If the result has content, then updates the product hint
-            if (result.hasContent) checkProduct(result.content);
-        } catch (err) {
-            // Presents an error message to the user
-            setMessage(err.message);
-        } finally {
-            // Reverts the WebView to the previous settings
-            document.body.style.background = "";
-            document.body.style.opacity = "1";
-            BarcodeScanner.showBackground();
-        }
+    const handleBarcodeScanner = async () => {
+        const {error, result} = await onStartScan();
+        if(error)
+            setMessage(result);
+        else if(result)
+            checkProduct(result);
     };
 
     const checkProduct = async (scanner?: any) => {
@@ -80,7 +50,6 @@ const Home: React.FC = () => {
                 const response = await getProducts(myBarcode);
                 if(response?.ok) {
                     const data = await response.json();
-                    console.log(data);
                     if(data.products.length > 0) {
                         const tmp: any = [];
                         data.products.forEach((product: any) => {
@@ -91,7 +60,6 @@ const Home: React.FC = () => {
                         setSessionToken(data.token);
                         setBarcode(myBarcode);
                         tmp.push(<IonRow style={{textAlign: "center"}}><IonCol><IonButton onClick={() => setNewP(true)}> Add new product </IonButton></IonCol></IonRow>)
-                        setProducts(tmp);
                         await setModalContent(<IonContent><IonGrid> {tmp} </IonGrid></IonContent>);
                     }
                     else {
@@ -101,16 +69,13 @@ const Home: React.FC = () => {
                         setBarcode(myBarcode);
                     }
                 }
+                else {
+                    setMessage(response?.status.toString());
+                    setAlert(true);
+                }
             }
             dismiss();
         }
-
-        /*BarcodeScanner.hideBackground(); // make background of WebView transparent
-        const result = await BarcodeScanner.startScan(); // start scanning and wait for a result
-        // if the result has content
-        if (result.hasContent) {
-          console.log(result.content); // log the raw scanned content
-        }*/
     }
 
     const [modalContent, setModalContent] = useState<any>();
@@ -123,13 +88,13 @@ const Home: React.FC = () => {
                         <IonInput
                             type="text"
                             id="input-barcode"
-                            color="secondary"
+                            color="dark"
                         />
                     </IonCol>
                     <IonCol>
                         <IonButton
-                            color="light"
-                            onClick={onStartScan}
+                            color="dark"
+                            onClick={handleBarcodeScanner}
                         />
                     </IonCol>
                 </IonRow>
@@ -141,6 +106,24 @@ const Home: React.FC = () => {
             </IonGrid>
         </IonContent>
     );
+
+    useEffect(() => {
+        setHome();
+    }, []); 
+
+    useEffect(() => {
+        if(searchText) {
+            const tmp: any = [];
+            queryResults?.values?.forEach((product: any) => {
+                if(product.name.toLowerCase() === searchText.toLowerCase())
+                    tmp.push(product);
+            });
+            setProducts(tmp);
+        }
+        else {
+            setProducts(queryResults?.values);
+        }
+    }, [searchText])
 
     useEffect(() => {
         if(showModal)
@@ -165,6 +148,11 @@ const Home: React.FC = () => {
                 <IonGrid>
                     <IonRow>
                         <IonCol>
+                            <IonSearchbar searchIcon={searchCircleOutline} value={searchText} onIonChange={e => setSearchText(e.detail.value!)} showCancelButton="always" />
+                        </IonCol>
+                    </IonRow>
+                    <IonRow>
+                        <IonCol>
                             <IonAlert
                                 isOpen={alert}
                                 onDidDismiss={() => setAlert(false)}
@@ -175,12 +163,12 @@ const Home: React.FC = () => {
                             />
                         </IonCol>
                     </IonRow>
-
+                    
                     <IonRow>
                         <IonCol>
                             <IonList>
-                                {queryResults?.values?.map((product: any) => {
-                                    return <LocalCard id={product.id} barcode={product.barcode} name={product.name} description={product.description} image={product.image} quantity={product.quantity} setQueryResult={setQueryResults}/>
+                                {products?.map((product: any) => {
+                                    return <LocalCard id={product.id} barcode={product.barcode} name={product.name} description={product.description} image={product.image} quantity={product.quantity} setProducts={setProducts}/>
                                 })}
                             </IonList>
                         </IonCol>
@@ -199,7 +187,7 @@ const Home: React.FC = () => {
                     </IonFab>
                     {modalContent}
                 </IonModal>
-            </IonContent>
+            </IonContent> 
         </IonPage>
     );
 };

@@ -1,7 +1,8 @@
-import { IonCard, IonImg, IonRow, IonCol, IonCardHeader, IonFab, IonCardTitle, IonFabButton, IonCardContent, IonItem, IonIcon, IonLabel, IonButton, IonContent, IonCardSubtitle } from '@ionic/react';
-import { trashBin } from 'ionicons/icons';
+import { IonCard, IonImg, IonRow, IonCol, IonCardHeader, IonFab, IonCardTitle, IonFabButton, IonCardContent, IonItem, IonIcon, IonLabel, IonButton, IonContent, IonCardSubtitle, IonInput } from '@ionic/react';
+import { addCircle, removeCircle, trashBin } from 'ionicons/icons';
+import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { QueryDeleteProduct, QueryGetProducts } from '../request/Database';
+import { QueryDeleteProduct, QueryGetProducts, QueryAdd_DecQuantity } from '../request/Database';
 
 interface CardProps {
     barcode: String;
@@ -10,7 +11,7 @@ interface CardProps {
     description: String;
     image: any;
     quantity: Number;
-    setQueryResult: any;
+    setProducts: any;
 }
 
 const useStyles = createUseStyles({
@@ -25,12 +26,23 @@ const useStyles = createUseStyles({
   }
 });
 
-const LocalCard: React.FC<CardProps> = ({ barcode, id, name, description, image, quantity, setQueryResult}) => {
+const LocalCard: React.FC<CardProps> = ({ barcode, id, name, description, image, quantity, setProducts}) => {
+    const [myQuantity, setMyQuantity] = useState<any>(quantity);
     const classes = useStyles();
   
     const deleteProduct = async () => {
         const response = await QueryDeleteProduct(id);
-        setQueryResult(await QueryGetProducts());
+        setProducts(await QueryGetProducts());
+    }
+
+    const addQuantity = async () => {
+      await setMyQuantity(myQuantity + 1);
+      await QueryAdd_DecQuantity(id, myQuantity);
+    }
+
+    const decQuantity = async () => {
+      await setMyQuantity(myQuantity - 1);
+      await QueryAdd_DecQuantity(id, myQuantity);
     }
 
   /*
@@ -60,7 +72,17 @@ const LocalCard: React.FC<CardProps> = ({ barcode, id, name, description, image,
             </IonRow>
             <IonRow>
               <IonCol>
-                <IonItem style={{float: 'left', fontSize: '14px'}}> {quantity} </IonItem> 
+                <IonButton size="small" onClick={decQuantity}>
+                  <IonIcon icon={removeCircle}/>  
+                </IonButton>
+              </IonCol>
+              <IonCol>
+                <IonItem style={{float: 'left', fontSize: '14px'}}> {myQuantity} </IonItem>
+              </IonCol>
+              <IonCol>
+                <IonButton size="small" onClick={addQuantity}>
+                  <IonIcon icon={addCircle}/>
+                </IonButton>
               </IonCol>
               <IonCol>
                 <IonButton onClick={deleteProduct} style={{float: "right"}}>

@@ -64,6 +64,23 @@ export const QueryUpdateProduct = async (id: any, productData: any) => {
 };
 
 /**
+ * 
+ * @param id 
+ * @param quantity 
+ * @returns 
+ */
+export const QueryAdd_DecQuantity = async (id: any, quantity: any) => {
+    if (!!database) {
+        return await database.query(
+            "UPDATE contacts SET quantity=? WHERE id = ?;",
+            [quantity, id + ""]
+        );
+    }
+};
+
+
+
+/**
  * Delete an existing product in the database by id
  * @param barcode 
  * @returns 
