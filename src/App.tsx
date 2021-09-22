@@ -1,12 +1,12 @@
-import { IonApp, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonTabs, IonLabel, IonContent } from '@ionic/react';
+import { IonApp, IonRouterOutlet, IonTabBar, IonTabButton, IonIcon, IonTabs, IonLabel, IonContent, IonRoute } from '@ionic/react';
 import Registration from './pages/Registration';
 import Login from './pages/Login';
 import Home from './pages/Home';
-import Profile from './pages/Profile';
+import ShoppingList from './pages/ShoppingList';
 import { IonReactRouter } from '@ionic/react-router';
-import { Redirect, Route } from 'react-router-dom';
-import { homeOutline, personOutline } from 'ionicons/icons';
-import { getValue } from './request/utility';
+import { Redirect, Route, useHistory } from 'react-router-dom';
+import { homeOutline, listOutline, logOutOutline } from 'ionicons/icons';
+import { isAuthed, removeKey } from './utils/utility';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -27,22 +27,31 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import { useEffect, useState } from 'react';
-
-
+import { closeConnection } from './utils/Database';
 
 const App: React.FC = () => {
   const [path, setPath] = useState<any>('');
+  const [disabled, setDisabled] = useState<boolean>(false);
+  const history = useHistory();
+
+  const handleLogout = async () => {
+    await removeKey("accessToken");
+    await removeKey("date");
+    //history.push('/login')
+    await closeConnection();
+    window.location.assign('/login')
+  }
+
+  const tabClicked = async (e: any) => {
+    if(e.detail.tab == 'logout')
+      await handleLogout();
+  }
 
   useEffect(() => {
     (async () => {
-      const token = await getValue("accessToken");
-      const date = new Date(await getValue("date"));
-      const today = new Date();
-      date.setDate(date.getDate() + 7);
-      if(token != null && date.getTime() > today.getTime())
-        setPath('/home');
-      else
-        setPath('/login');
+      const response = await isAuthed();
+      setDisabled(!response);
+      setPath(response ? '/home' : '/login')
     })();
   }, []);
 
@@ -50,28 +59,32 @@ const App: React.FC = () => {
   return(
     <IonApp>
       <IonReactRouter>
-        <IonTabs>
+        <IonTabs onIonTabsDidChange={tabClicked}>
           <IonRouterOutlet>
             <Route exact path="/home">
               <Home />
             </Route>
-            <Route exact path="/profile">
-              <Profile />
+            <Route exact path="/shoppingList">
+              <ShoppingList />
             </Route>
             <Route exact path="/">
               <Redirect to={path} />
             </Route>
-            <Route exact path="/login" component={Login} />
+            <Route exact path="/login" render={() => { return <Login setDisabled={setDisabled}/>}} />
             <Route path="/registration" component={Registration} />
           </IonRouterOutlet>
-          <IonTabBar slot="bottom">
-            <IonTabButton tab="home" href="/home">
+          <IonTabBar slot="bottom" color="dark">
+            <IonTabButton tab="home" href="/home" disabled={disabled}>
               <IonIcon icon={homeOutline} />
               <IonLabel> Home </IonLabel>
             </IonTabButton>
-            <IonTabButton tab="profile" href="/profile">
-              <IonIcon icon={personOutline} />
-              <IonLabel> Profile </IonLabel>
+            <IonTabButton tab="shoppingList" href="/shoppingList" disabled={disabled}>
+              <IonIcon icon={listOutline} />
+              <IonLabel> Shopping List </IonLabel>
+            </IonTabButton>
+            <IonTabButton tab="logout" disabled={disabled}>
+              <IonIcon icon={logOutOutline} />
+              <IonLabel> Logout </IonLabel>
             </IonTabButton>
           </IonTabBar>
         </IonTabs>

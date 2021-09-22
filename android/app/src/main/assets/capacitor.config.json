@@ -1,6 +1,6 @@
 {
 	"appId": "io.ionic.starter",
-	"appName": "TrackingMyPantry",
+	"appName": "TrackMyPantry",
 	"webDir": "build",
 	"bundledWebRuntime": false
 }

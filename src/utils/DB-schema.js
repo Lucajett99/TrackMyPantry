@@ -8,24 +8,22 @@ const dataToImport = {
     {
       name: "products",
       schema: [
-        { column: "id", value: "TEXT PRIMARY KEY NOT NULL" },
+        { column: "id", value: "TEXT NOT NULL" },
         { column: "barcode", value: "TEXT NOT NULL" },
         { column: "name", value: "TEXT NOT NULL" },
         { column: "description", value: "TEXT" },
         { column: "quantity", value: "INTEGER" },
         { column: "image", value: "TEXT" },
+        { column: "email", value: "TEXT"},
         {
           column: "last_modified",
           value: "INTEGER DEFAULT (strftime('%s', 'now'))",
         },
+        { constraint: 'PK_id_email', value: 'PRIMARY KEY (id,email)'},
+        
       ],
       // indexes: [{ name: "index_user_on_email", column: "email" }],
-      values: [
-        [1, 1, "Nutella", "Dolce", 1, null, now],
-        [2, 2, "Coca Cola", "Bibita", 6, null, now],
-        [3, 3, "Maionese", "Salsa", 2, null, now],
-        [4, 4, "Pomodori", "Verdura", 20, null, now],
-      ],
+      values: [      ],
     },
   ],
 };

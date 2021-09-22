@@ -1,25 +1,28 @@
-import { IonContent, IonPage, IonFab, IonFabButton, IonTextarea, IonImg, useIonLoading } from '@ionic/react';
+import { IonContent, IonPage, IonFab, IonFabButton, IonTextarea, IonImg } from '@ionic/react';
 import React, { useState } from 'react';
-import { postProduct } from '../request/API';
-import { takePicture } from '../request/utility';
+import { postProduct } from '../utils/API';
+import { getValue, productData, openCamera } from '../utils/utility';
 import { IonGrid, IonRow, IonCol } from '@ionic/react';
-import { camera, closeOutline, closeCircleOutline } from "ionicons/icons";
+import { camera, closeOutline, closeCircleOutline, imageOutline } from "ionicons/icons";
 import { IonItem, IonLabel, IonInput, IonButton, IonIcon, IonAlert } from '@ionic/react';
+import { QueryCreateProduct, QueryGetProducts } from '../utils/Database';
 interface ProductProps {
-    sessionToken: String;
-    barcode: String;
+    sessionToken: string;
+    barcode: string;
     closeModal: any;
     setNewP: any;
+    setProducts: any;
+    setQueryResults: any;
 }
 
-const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, setNewP}) => {
-  const [name, setName] = useState<string>("xxxxxxxx");
-  const [description, setDescription] = useState<string>("xxxxxxxx");
+const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, setNewP, setProducts, setQueryResults}) => {
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const [image, setImage] = useState<any>(null);
   const [iserror, setIserror] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
-  const [show, dismiss] = useIonLoading();
 
+  //create a new product on the shared database
   const handleAddProduct = async () => {
     if (!name) {
         setMessage("Please enter the name of the product");
@@ -31,26 +34,33 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
         setIserror(true);
         return;
     }
-
-    show("Loading");
+    //calls the function that makes the http call that adds a product to the shared database
     const response = await postProduct(sessionToken, name, description, barcode, true, image ? image : null);
     if(response) {
-      console.log(response.ok)
       if(response.ok) {
-        const data = await response.json();
-        console.log(data);
+        const responseJson = await response.json();
+        const email = await getValue("email");
+        const id = responseJson.id;
+        const data: productData = { id, barcode, name, description, image, email };
+        //query that adds the product to the local database
+        await QueryCreateProduct(data);
+        //update the products in the home
+        const products = await QueryGetProducts(email);
+        await setQueryResults(products);
+        await setProducts(products?.values);
+        //it is used to change the contents of the modal window
         setNewP(false);
       }
       else {
-        setMessage(response.status.toString());
+        setMessage(response.statusText ? response.statusText : "Status code: " + response.status.toString());
         setIserror(true);
       }
     }
-    dismiss();
   };
 
+  //opens the camera
   const handlePicture = async () => {
-    const img = await takePicture();
+    const img = await openCamera();
     if(img)
       setImage(img);
   }
@@ -78,20 +88,18 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
         </IonRow>
         <IonRow>
             <IonCol>
-              <IonItem>
-                <IonImg src={image ? "data:image/jpeg;base64," + image : '#'} />
-              </IonItem>
+                {image ? <IonImg src={"data:image/jpeg;base64," + image} /> : <IonIcon size="large" icon={imageOutline}/>}
             </IonCol>
             <IonCol>
               <IonFab vertical="center" horizontal="center">
-                  <IonFabButton size="small" onClick={handlePicture}>
+                  <IonFabButton size="small" color="dark" onClick={handlePicture}>
                       <IonIcon icon={camera} />
                   </IonFabButton>
               </IonFab>
             </IonCol>
             <IonCol>
               <IonFab vertical="center" horizontal="center">
-                  <IonFabButton size="small" onClick={() => setImage(null)}>
+                  <IonFabButton size="small" color="dark" onClick={() => setImage(null)}>
                       <IonIcon icon={closeCircleOutline} />
                   </IonFabButton>
               </IonFab>
@@ -119,7 +127,7 @@ const NewProduct: React.FC<ProductProps> = ({sessionToken, barcode, closeModal, 
             </IonCol>
           </IonRow>
         </IonGrid>
-        <IonButton onClick={handleAddProduct}>ADD</IonButton>
+        <IonButton onClick={handleAddProduct} color="dark"> ADD </IonButton>
       </IonContent>
     </IonPage>
   );
