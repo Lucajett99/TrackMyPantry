@@ -1,5 +1,4 @@
-Introduzione {#introduzione .unnumbered}
-============
+# Track My Pantry
 
 Track my Pantry è un’applicazione sviluppata per il corso di Laboratorio
 di applicazioni mobili per il C.d.L. di Informatica (a.a. 2020/21).\
@@ -83,9 +82,10 @@ Login e Registrazione
 Dalle immagini seguenti si può vedere che sono due pagine molto semplici
 e molto minimali
 
-<span>2</span>
-
-![image](Login) ![image](Registration)
+<p align="center">
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/Login.JPG?raw=true" width="200" height="auto"/>
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/Registration.JPG?raw=true" width="200" height="auto"/>
+</p>
 
 Login
 -----
@@ -164,8 +164,6 @@ Card
 
 Ogni prodotto viene rappresentato da una card, in cui è presente:
 
-<span>2</span>
-
 -   Il nome del prodotto
 
 -   La quantità disponibile
@@ -177,10 +175,12 @@ Ogni prodotto viene rappresentato da una card, in cui è presente:
 
 -   Un bottone per altri dettagli del prodotto (finestra con descrizione
     e barcode)
+    
+<p align="center">
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/Home.JPG?raw=true" width="200" height="auto" />
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/Home_detail.JPG?raw=true" width="200" height="auto" />
+</p>
 
-<span>.5</span> ![image](Home)
-
-<span>.5</span> ![image](Home_detail)
 
 La particolarità dell’app sta nel fatto che se la quantità dovesse
 divenire uguale a 0, la card verrà automaticamente rimossa dalla Home e
@@ -212,14 +212,13 @@ dare il voto al prodotto).\
 Per la scannerizzazione del barcode ho utilizzato un plugin di Capacitor
 ’barcode-scanner’.
 
-<span>.5</span> ![image](Barcode)
-
-<span>.5</span> ![image](Product_list)
+<p align="center">
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/Barcode.JPG?raw=true" width="200" height="auto"/>
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/Product_list.JPG?raw=true" width="200" height="auto" />
+</p>
 
 Aggiunta di un nuovo prodotto
 -----------------------------
-
-<span>2</span>
 
 Se l’utente non è convinto dei prodotti già presenti o il prodotto
 (barcode) non è proprio presente nel database remoto, c’è la possibilità
@@ -237,12 +236,12 @@ seguenti dettagli:
 Dopo aver creato il prodotto, esso verrà automaticamente aggiunto alla
 dispensa con quantità = 1.
 
-![image](NewProduct)
+<p align="center">
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/NewProduct.JPG?raw=true" width="200" height="auto"/>
+</p>
 
 Shopping List
 =============
-
-<span>2</span>
 
 In questa sezione dell’app ci sono tutti i prodotti del database locale
 che hanno quantità = 0.\
@@ -252,7 +251,9 @@ Per aggiornarla di volta in volta utilizzo un evento che viene chiamato
 ogni qual volta un prodotto raggiunge quantità = 0 o quando viene
 nuovamente comprato (quindi ricercato nel database condiviso).
 
-![image](ShoppingList)
+<p align="center">
+    <img src="https://github.com/Lucajett99/TrackMyPantry/blob/master/images/ShoppingList.JPG?raw=true" width="200" height="auto"/>
+</p>
 
 Gestione utenti diversi
 =======================
