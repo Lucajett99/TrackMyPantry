@@ -40,7 +40,7 @@ la home, la seconda è la shopping list e la terza non è una vera e
 propria tab ma serve semplicemente per fare il logout.\
 La pagina di avvio dell’app cambia in base a se l’utente è stato già
 autenticato o meno (dopo 7 giorni dalla login, l’ access token scade),
-se è autenticato la pagina base sarà /Home altrimenti sarà /Login.\
+se è autenticato la pagina base sarà /Home altrimenti sarà /Login.
 
 Funzionalità
 ============
